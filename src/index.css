@@ -1,6 +1,6 @@
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
+  --text: #000;
+  --text-h: #000;
   --bg: #fff;
   --border: #e5e4e7;
   --code-bg: #f4f3ec;
@@ -43,6 +43,17 @@
   --shadow:
     rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
   color-scheme: dark;
+}
+
+@media print {
+  :root,
+  :root[data-theme="dark"] {
+    --text: #000;
+    --text-h: #000;
+    --bg: #fff;
+    --border: #000;
+    color-scheme: light;
+  }
 }
 
 body {

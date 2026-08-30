@@ -6,8 +6,6 @@ import SystemWrapper from './components/system-wrapper'
 function Home() {
   return (
     <main className="page">
-      <p className="eyebrow">Tonal generating systems</p>
-
       <SystemWrapper />
     </main>
   )
@@ -16,12 +14,7 @@ function Home() {
 function About() {
   return (
     <main className="page">
-      <p className="eyebrow">About</p>
-      <h1>A focused place for musical experiments.</h1>
-      <p className="intro">
-        This route is ready for the first tonal generation tools and ABCJS
-        notation views.
-      </p>
+      <p className="intro">Tool for generating tonal systems in different keys</p>
     </main>
   )
 }
@@ -49,7 +42,7 @@ function App() {
     <BrowserRouter>
       <header className="site-header">
         <NavLink className="brand" to="/">
-          TGS
+          Tonal Generating Systems
         </NavLink>
         <nav aria-label="Main navigation">
           <NavLink

@@ -30,6 +30,41 @@ nav a.active {
   color: var(--accent);
 }
 
+.system-controls {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 40px;
+}
+
+.system-controls h2 {
+  flex-basis: 100%;
+  margin-bottom: 4px;
+}
+
+.system-controls label {
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.system-controls select {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-h);
+  cursor: pointer;
+  font: inherit;
+  min-width: 112px;
+  padding: 12px 36px 12px 14px;
+}
+
+.system-controls select:focus-visible {
+  border-color: var(--accent);
+  outline: 2px solid var(--accent-border);
+  outline-offset: 2px;
+}
+
 .theme-switch {
   background: transparent;
   border: 1px solid var(--border);
@@ -103,5 +138,29 @@ h1 {
 
   .page {
     padding-top: 12vh;
+  }
+}
+
+@media print {
+  .site-header {
+    border-bottom: none;
+    justify-content: flex-start;
+    padding: 0 0 24px;
+  }
+
+  .site-header nav,
+  .theme-switch,
+  .system-controls {
+    display: none;
+  }
+
+  .brand {
+    color: #000;
+    padding: 8px 0;
+  }
+
+  .page {
+    max-width: none;
+    padding: 0;
   }
 }

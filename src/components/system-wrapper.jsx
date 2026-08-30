@@ -1,10 +1,7 @@
 import { useState } from 'react'
-import HarmonicMajorSystem from './harmonic-major-system'
-import HarmonicMinorSystem from './harmonic-minor-system'
-import MajorSystem from './major-system'
-import MelodicMinorSystem from './melodic-minor-system'
+import { DEFAULT_KEYS, TONAL_SYSTEMS } from '../data/tonal-systems'
+import TonalSystem from './tonal-system'
 
-const DEFAULT_KEYS = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B']
 const CLEFS = [
   { value: 'treble', label: 'Treble' },
   { value: 'bass', label: 'Bass' },
@@ -17,8 +14,7 @@ function SystemWrapper({ keys = DEFAULT_KEYS }) {
 
   return (
     <>
-      <section aria-labelledby="system-controls-title">
-        <h2 id="system-controls-title">System controls</h2>
+      <section className="system-controls" aria-labelledby="system-controls-title">
         <label htmlFor="key-select">Choose a key</label>
         <select
           id="key-select"
@@ -44,10 +40,14 @@ function SystemWrapper({ keys = DEFAULT_KEYS }) {
           ))}
         </select>
       </section>
-      <MajorSystem keyValue={selectedKey} clefValue={selectedClef} />
-      <MelodicMinorSystem keyValue={selectedKey} clefValue={selectedClef} />
-      <HarmonicMinorSystem keyValue={selectedKey} clefValue={selectedClef} />
-      <HarmonicMajorSystem keyValue={selectedKey} clefValue={selectedClef} />
+      {TONAL_SYSTEMS.map((system) => (
+        <TonalSystem
+          key={system.id}
+          system={system}
+          keyValue={selectedKey}
+          clefValue={selectedClef}
+        />
+      ))}
     </>
   )
 }
