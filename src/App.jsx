@@ -1,20 +1,14 @@
+import { useEffect, useState } from 'react'
 import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom'
 import './App.css'
+import ScaleSystem from './components/scale-system'
 
 function Home() {
   return (
     <main className="page">
       <p className="eyebrow">Tonal generating systems</p>
-      <h1>Build musical ideas in the browser.</h1>
-      <p className="intro">
-        A small React workspace for exploring harmony, notation, and generative
-        composition.
-      </p>
-      <div className="actions">
-        <NavLink className="button primary" to="/about">
-          Explore the project
-        </NavLink>
-      </div>
+
+      <ScaleSystem />
     </main>
   )
 }
@@ -45,6 +39,12 @@ function NotFound() {
 }
 
 function App() {
+  const [isDarkMode, setIsDarkMode] = useState(true)
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = isDarkMode ? 'dark' : 'light'
+  }, [isDarkMode])
+
   return (
     <BrowserRouter>
       <header className="site-header">
@@ -66,6 +66,15 @@ function App() {
             About
           </NavLink>
         </nav>
+        <button
+          className="theme-switch"
+          type="button"
+          role="switch"
+          aria-checked={isDarkMode}
+          onClick={() => setIsDarkMode((enabled) => !enabled)}
+        >
+          {isDarkMode ? 'Light mode' : 'Dark mode'}
+        </button>
       </header>
       <Routes>
         <Route path="/" element={<Home />} />
