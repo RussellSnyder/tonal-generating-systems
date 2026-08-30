@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react'
 import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom'
 import './App.css'
-import ScaleSystem from './components/scale-system'
+import SystemWrapper from './components/system-wrapper'
 
 function Home() {
   return (
     <main className="page">
       <p className="eyebrow">Tonal generating systems</p>
 
-      <ScaleSystem />
+      <SystemWrapper />
     </main>
   )
 }
