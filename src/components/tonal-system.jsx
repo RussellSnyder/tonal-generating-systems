@@ -111,6 +111,7 @@ T:${system.title}
 V:1 clef=${clefValue}
 L:4/4
 ${chordProgression}`,
+  { responsive: 'resize' },
     )
   }, [chordProgression, clefValue, selectedKey, system])
 

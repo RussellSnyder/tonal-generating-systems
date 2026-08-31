@@ -164,7 +164,7 @@ export const TONAL_SYSTEMS = [
       C: "C D E F G _A B c",
       "C#": "^C ^D ^E ^F ^G A ^B ^c",
       D: "D E ^F G A _B ^c d",
-      Eb: "_E F G _A _B _c ^d _e",
+      Eb: "_E F G _A _B _c d _e",
       E: "E ^F ^G A B c ^d e",
       F: "F G A _B c _d e f",
       "F#": "^F ^G ^A ^B ^c d ^e ^f",
