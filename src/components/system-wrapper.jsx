@@ -11,6 +11,7 @@ const CLEFS = [
 function SystemWrapper({ keys = DEFAULT_KEYS }) {
   const [selectedKey, setSelectedKey] = useState(keys[0])
   const [selectedClef, setSelectedClef] = useState(CLEFS[0].value)
+  const [octaveShift, setOctaveShift] = useState(0)
 
   return (
     <>
@@ -39,6 +40,17 @@ function SystemWrapper({ keys = DEFAULT_KEYS }) {
             </option>
           ))}
         </select>
+        <label htmlFor="octave-select">Choose an octave</label>
+        <select
+          id="octave-select"
+          value={octaveShift}
+          onChange={(event) => setOctaveShift(Number(event.target.value))}
+        >
+          <option value={1}>Start at {selectedKey}5</option>
+          <option value={0}>Start at {selectedKey}4</option>
+          <option value={-1}>Start at {selectedKey}3</option>
+          <option value={-2}>Start at {selectedKey}2</option>
+        </select>
       </section>
       {TONAL_SYSTEMS.map((system) => (
         <TonalSystem
@@ -46,6 +58,7 @@ function SystemWrapper({ keys = DEFAULT_KEYS }) {
           system={system}
           keyValue={selectedKey}
           clefValue={selectedClef}
+          octaveShift={octaveShift}
         />
       ))}
     </>

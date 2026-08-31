@@ -2,12 +2,43 @@ import ABCJS from 'abcjs'
 import { useEffect } from 'react'
 
 function toNextOctave(noteToken) {
-  return noteToken.replace(/[A-Ga-g]$/, (note) => note.toLowerCase())
+  return noteToken.replace(/^([_^]*)([A-Ga-g])([',]*)$/, (_, accidental, note, octaveMarks) => {
+    return note === note.toUpperCase()
+      ? `${accidental}${note.toLowerCase()}${octaveMarks}`
+      : `${accidental}${note}${octaveMarks}'`
+  })
 }
 
 function toLowerOctave(noteToken) {
-  return noteToken.replace(/[A-Ga-g]$/, (note) =>
-    note === note.toLowerCase() ? note.toUpperCase() : `${note},`,
+  return noteToken.replace(/^([_^]*)([A-Ga-g])([',]*)$/, (_, accidental, note, octaveMarks) => {
+    if (octaveMarks.endsWith("'")) {
+      return `${accidental}${note}${octaveMarks.slice(0, -1)}`
+    }
+
+    return note === note.toLowerCase()
+      ? `${accidental}${note.toUpperCase()}`
+      : `${accidental}${note},`
+  })
+}
+
+function shiftOctave(noteToken, octaveShift) {
+  return Array.from({ length: Math.abs(octaveShift) }).reduce(
+    (shiftedNote) => {
+      if (octaveShift < 0) {
+        return toLowerOctave(shiftedNote)
+      }
+
+      return shiftedNote.replace(/^([_^]*)([A-Ga-g])([',]*)$/, (_, accidental, note, octaveMarks) => {
+        if (octaveMarks.endsWith(',')) {
+          return `${accidental}${note}${octaveMarks.slice(0, -1)}`
+        }
+
+        return note === note.toUpperCase()
+          ? `${accidental}${note.toLowerCase()}`
+          : `${accidental}${note}'`
+      })
+    },
+    noteToken,
   )
 }
 
@@ -49,7 +80,12 @@ function toChordRoot(noteToken) {
   return `${noteLetter}${accidental}`
 }
 
-function TonalSystem({ system, keyValue = 'C', clefValue = 'treble' }) {
+function TonalSystem({
+  system,
+  keyValue = 'C',
+  clefValue = 'treble',
+  octaveShift = 0,
+}) {
   const selectedKey = keyValue
   const scaleNotes = system.scaleNotes[selectedKey] ?? system.scaleNotes.C
   const scaleDegrees = scaleNotes.split(' ')
@@ -69,10 +105,9 @@ function TonalSystem({ system, keyValue = 'C', clefValue = 'treble' }) {
 
       return alterNote(chordNote, noteAlterations[noteIndex])
     })
-    const renderedChordNotes =
-      clefValue === 'bass' || clefValue === 'alto'
-        ? chordNotes.map(toLowerOctave)
-        : chordNotes
+    const renderedChordNotes = chordNotes.map((note) =>
+      shiftOctave(note, octaveShift),
+    )
     const chordRoot = toChordRoot(scaleDegrees[rootDegree])
     const chordLabel = parenthesized
       ? `(${chordRoot}${chordQuality})`
@@ -113,7 +148,7 @@ L:4/4
 ${chordProgression}`,
   { responsive: 'resize' },
     )
-  }, [chordProgression, clefValue, selectedKey, system])
+  }, [chordProgression, clefValue, octaveShift, selectedKey, system])
 
   return (
     <section
