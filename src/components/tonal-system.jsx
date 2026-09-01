@@ -84,17 +84,27 @@ function TonalSystem({
   system,
   keyValue = 'C',
   clefValue = 'treble',
+  chordType = 'four-note',
   octaveShift = 0,
 }) {
   const selectedKey = keyValue
   const scaleNotes = system.scaleNotes[selectedKey] ?? system.scaleNotes.C
   const scaleDegrees = scaleNotes.split(' ')
+  const isTriad = chordType === 'triad'
+  const triadQualityMap = {
+    major: 'maj',
+    minor: 'min',
+    diminished: 'dim',
+    augmented: 'aug',
+  }
   const createChord = (
     degree,
-    chordQuality = system.chordQualities[degree],
+    chordQuality = isTriad
+      ? triadQualityMap[system.triadTypes?.[degree]] ?? 'maj'
+      : system.chordQualities[degree],
     noteAlterations = {},
     showSymbol = true,
-    noteDegrees = [0, 2, 4, 6],
+    noteDegrees = isTriad ? [0, 2, 4] : [0, 2, 4, 6],
     rootDegree = degree,
     parenthesized = false,
   ) => {
@@ -122,7 +132,7 @@ function TonalSystem({
 
   const chordEntries = Array.from({ length: 7 }, (unused, degree) => [
     { notation: createChord(degree) },
-    ...(system.extraChords ?? [])
+    ...((isTriad ? [] : system.extraChords ?? [])
       .filter((extraChord) => extraChord.afterDegree === degree)
       .map((extraChord) => ({
         notation: createChord(
@@ -134,7 +144,7 @@ function TonalSystem({
           extraChord.rootDegree,
           extraChord.parenthesized,
         ),
-      })),
+      }))),
   ]).flat()
   const chordProgression = chordEntries.map((entry) => entry.notation).join(' ')
 

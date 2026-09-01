@@ -32,20 +32,21 @@ nav a.active {
 
 .system-controls {
   align-items: center;
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 40px;
 }
 
 .system-controls h2 {
-  flex-basis: 100%;
+  grid-column: 1 / -1;
   margin-bottom: 4px;
 }
 
 .system-controls label {
   color: var(--text);
   font-size: 0.9rem;
+  margin-right: 10px;
 }
 
 .system-controls select {

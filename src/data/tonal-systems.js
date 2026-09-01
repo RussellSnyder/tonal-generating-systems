@@ -20,6 +20,15 @@ export const TONAL_SYSTEMS = [
     title: "Major",
     ariaLabel: "major scale notation",
     chordQualities: ["maj7", "m7", "m7", "maj7", "7", "m7", "m7b5"],
+    triadTypes: [
+      "major",
+      "minor",
+      "minor",
+      "major",
+      "major",
+      "minor",
+      "diminished",
+    ],
     scaleNotes: {
       C: "C D E F G A B c",
       "C#": "^C ^D ^E ^F ^G ^A ^B ^c",
@@ -41,6 +50,15 @@ export const TONAL_SYSTEMS = [
     title: "Melodic Minor",
     ariaLabel: "melodic minor notation",
     chordQualities: ["mMaj7", "m7", "maj7#5", "7", "7", "m7b5", "m7b5"],
+    triadTypes: [
+      "minor",
+      "minor",
+      "augmented",
+      "major",
+      "major",
+      "diminished",
+      "diminished",
+    ],
     extraChords: [
       {
         afterDegree: 6,
@@ -82,6 +100,15 @@ export const TONAL_SYSTEMS = [
     title: "Harmonic Minor",
     ariaLabel: "harmonic minor notation",
     chordQualities: ["mMaj7", "m7b5", "maj7#5", "m7", "7", "maj7", "dim7"],
+    triadTypes: [
+      "minor",
+      "diminished",
+      "augmented",
+      "minor",
+      "major",
+      "major",
+      "diminished",
+    ],
     extraChords: [
       {
         afterDegree: 3,
@@ -124,6 +151,15 @@ export const TONAL_SYSTEMS = [
     title: "Harmonic Major",
     ariaLabel: "harmonic major notation",
     chordQualities: ["maj7", "m7b5", "m7", "mMaj7", "7", "maj7#5", "dim7"],
+    triadTypes: [
+      "major",
+      "diminished",
+      "minor",
+      "minor",
+      "major",
+      "augmented",
+      "diminished",
+    ],
     extraChords: [
       {
         afterDegree: 0,
