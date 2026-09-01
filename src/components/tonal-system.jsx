@@ -2,7 +2,7 @@ import ABCJS from 'abcjs'
 import { useEffect } from 'react'
 
 function toNextOctave(noteToken) {
-  return noteToken.replace(/^([_^]*)([A-Ga-g])([',]*)$/, (_, accidental, note, octaveMarks) => {
+  return noteToken?.replace(/^([_^]*)([A-Ga-g])([',]*)$/, (_, accidental, note, octaveMarks) => {
     return note === note.toUpperCase()
       ? `${accidental}${note.toLowerCase()}${octaveMarks}`
       : `${accidental}${note}${octaveMarks}'`
@@ -10,7 +10,7 @@ function toNextOctave(noteToken) {
 }
 
 function toLowerOctave(noteToken) {
-  return noteToken.replace(/^([_^]*)([A-Ga-g])([',]*)$/, (_, accidental, note, octaveMarks) => {
+  return noteToken?.replace(/^([_^]*)([A-Ga-g])([',]*)$/, (_, accidental, note, octaveMarks) => {
     if (octaveMarks.endsWith("'")) {
       return `${accidental}${note}${octaveMarks.slice(0, -1)}`
     }
@@ -88,8 +88,10 @@ function TonalSystem({
   octaveShift = 0,
 }) {
   const selectedKey = keyValue
-  const scaleNotes = system.scaleNotes[selectedKey] ?? system.scaleNotes.C
-  const scaleDegrees = scaleNotes.split(' ')
+  const rawScaleNotes = system.scaleNotes?.[selectedKey] ?? system.scaleNotes?.C ?? []
+  const scaleDegrees = Array.isArray(rawScaleNotes)
+    ? rawScaleNotes
+    : String(rawScaleNotes).split(' ').filter(Boolean)
   const isTriad = chordType === 'triad'
   const triadQualityMap = {
     major: 'maj',

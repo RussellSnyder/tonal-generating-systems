@@ -13,6 +13,73 @@ export const DEFAULT_KEYS = [
   "B",
 ];
 
+const SCALE_SPELLING_TEMPLATE = {
+  major: {
+    C: ["C", "D", "E", "F", "G", "A", "B"],
+    "C#": ["^C", "^D", "^E", "^F", "^G", "^A", "^B"],
+    Db: ["_D", "_E", "_F", "_G", "_A", "_B", "c"],
+    D: ["D", "E", "^F", "G", "A", "B", "^C"],
+    Eb: ["_E", "F", "G", "_A", "_B", "c", "d"],
+    E: ["E", "^F", "^G", "A", "B", "C", "^D"],
+    "F#": ["^F", "^G", "^A", "B", "^c", "^d", "^e"],
+    F: ["F", "G", "A", "_B", "c", "d", "e"],
+    Gb: ["_G", "_A", "_B", "_C", "_D", "_E", "F"],
+    G: ["G", "A", "B", "C", "D", "E", "^F"],
+    Ab: ["_A", "_B", "c", "_d", "_e", "_f", "g"],
+    A: ["A", "B", "^C", "D", "E", "^F", "^G"],
+    Bb: ["_B", "c", "d", "_e", "f", "g", "a"],
+    B: ["B", "^c", "d", "e", "^f", "^g", "^a"],
+  },
+  melodicMinor: {
+    C: ["C", "D", "_E", "F", "G", "A", "B"],
+    "C#": ["^C", "^D", "E", "^F", "^G", "^A", "^B"],
+    Db: ["_D", "_E", "__F", "_G", "_A", "_B", "c"],
+    D: ["D", "E", "F", "G", "A", "B", "^C"],
+    Eb: ["_E", "F", "_G", "_A", "_B", "c", "d"],
+    E: ["E", "^F", "G", "A", "B", "C", "^D"],
+    "F#": ["^F", "^G", "A", "B", "^c", "^d", "^e"],
+    F: ["F", "G", "_A", "_B", "c", "d", "e"],
+    Gb: ["_G", "_A", "_B", "_C", "_D", "_E", "F"],
+    G: ["G", "A", "_B", "C", "D", "E", "^F"],
+    Ab: ["_A", "_B", "__C", "_D", "_E", "_F", "G"],
+    A: ["A", "B", "C", "D", "E", "^F", "^G"],
+    Bb: ["_B", "c", "_d", "_e", "f", "g", "a"],
+    B: ["B", "^c", "d", "e", "^f", "^g", "^a"],
+  },
+  harmonicMinor: {
+    C: ["C", "D", "_E", "F", "G", "_A", "B"],
+    "C#": ["^C", "^D", "E", "^F", "^G", "A", "^B"],
+    Db: ["C", "_D", "_E", "__F", "_G", "_A", "__B"],
+    D: ["^C", "D", "E", "F", "G", "A", "_B"],
+    Eb: ["_C", "D", "_E", "F", "_G", "_A", "_B"],
+    E: ["C", "^D", "E", "^F", "G", "A", "B"],
+    "F#": ["^C", "D", "^E", "^F", "^G", "A", "B"],
+    F: ["F", "G", "_A", "_B", "c", "_d", "e"],
+    Gb: ["_G", "_A", "_B", "_C", "_D", "D", "F"],
+    G: ["G", "A", "B", "C", "D", "_E", "^F"],
+    Ab: ["_A", "_B", "__C", "_D", "_E", "E", "G"],
+    A: ["A", "B", "C", "D", "E", "F", "^G"],
+    Bb: ["_B", "c", "_d", "_e", "f", "g", "a"],
+    B: ["B", "^c", "d", "e", "^f", "g", "^a"],
+  },
+  harmonicMajor: {
+    C: ["C", "D", "E", "F", "G", "_A", "B"],
+    "C#": ["^C", "^D", "^E", "^F", "^G", "A", "^B"],
+    Db: ["_D", "_E", "_F", "_G", "_A", "__B", "c"],
+    D: ["D", "E", "^F", "G", "A", "_B", "^C"],
+    Eb: ["_E", "F", "G", "_A", "_B", "_c", "d"],
+    E: ["E", "^F", "^G", "A", "B", "_C", "^D"],
+    "F#": ["^F", "^G", "^A", "B", "^c", "d", "^e"],
+    F: ["F", "G", "A", "_B", "c", "_d", "e"],
+    Gb: ["_G", "_A", "_B", "_C", "_D", "__E", "F"],
+    G: ["G", "A", "B", "C", "D", "_E", "^F"],
+    Ab: ["_A", "_B", "c", "_d", "_e", "__f", "g"],
+    A: ["A", "B", "^C", "D", "E", "F", "^G"],
+    Bb: ["_B", "c", "d", "_e", "f", "_g", "a"],
+    B: ["B", "^c", "d", "e", "^f", "g", "^a"],
+  },
+};
+
 export const TONAL_SYSTEMS = [
   {
     id: "abc-major",
@@ -29,20 +96,7 @@ export const TONAL_SYSTEMS = [
       "minor",
       "diminished",
     ],
-    scaleNotes: {
-      C: "C D E F G A B c",
-      "C#": "^C ^D ^E ^F ^G ^A ^B ^c",
-      D: "D E ^F G A B ^c d",
-      Eb: "_E F G _A _B c d _e",
-      E: "E ^F ^G A B ^c ^d e",
-      F: "F G A _B c d e f",
-      "F#": "^F ^G ^A ^B ^c ^d ^e ^f",
-      G: "G A B c d e ^f g",
-      Ab: "_A _B c _d _e f g _a",
-      A: "A B ^c d e ^f ^g a",
-      Bb: "_B c d _e f g a _b",
-      B: "B ^c ^d e ^f ^g ^a b",
-    },
+    scaleNotes: { ...SCALE_SPELLING_TEMPLATE.major },
   },
   {
     id: "abc-melodic-minor",
@@ -79,20 +133,7 @@ export const TONAL_SYSTEMS = [
         parenthesized: true,
       },
     ],
-    scaleNotes: {
-      C: "C D _E F G A B c",
-      "C#": "^C ^D E ^F ^G ^A ^B ^c",
-      D: "D E F G A B ^c d",
-      Eb: "_E F _G _A _B c d _e",
-      E: "E ^F G A B ^c ^d e",
-      F: "F G _A _B c d e f",
-      "F#": "^F ^G A B ^c ^d ^e ^f",
-      G: "G A _B c d e ^f g",
-      Ab: "_A _B _c _d _e f g _a",
-      A: "A B c d e ^f ^g a",
-      Bb: "_B c _d _e f g a _b",
-      B: "B ^c d e ^f ^g ^a b",
-    },
+    scaleNotes: { ...SCALE_SPELLING_TEMPLATE.melodicMinor },
   },
   {
     id: "abc-harmonic-minor",
@@ -129,21 +170,7 @@ export const TONAL_SYSTEMS = [
         parenthesized: true,
       },
     ],
-
-    scaleNotes: {
-      C: "C D _E F G _A B c",
-      "C#": "^C ^D E ^F ^G A ^B ^c",
-      D: "D E F G A _B ^c d",
-      Eb: "_E F _G _A _B _c ^d _e",
-      E: "E ^F G A B c ^d e",
-      F: "F G _A _B c _d e f",
-      "F#": "^F ^G A B ^c d ^e ^f",
-      G: "G A _B c d _e ^f g",
-      Ab: "_A _B _c _d _e _f g _a",
-      A: "A B c d e f ^g a",
-      Bb: "_B c _d _e f _g a _b",
-      B: "B ^c d e ^f g ^a b",
-    },
+    scaleNotes: { ...SCALE_SPELLING_TEMPLATE.harmonicMinor },
   },
   {
     id: "abc-harmonic-major",
@@ -196,19 +223,291 @@ export const TONAL_SYSTEMS = [
         showSymbol: false,
       },
     ],
-    scaleNotes: {
-      C: "C D E F G _A B c",
-      "C#": "^C ^D ^E ^F ^G A ^B ^c",
-      D: "D E ^F G A _B ^c d",
-      Eb: "_E F G _A _B _c d _e",
-      E: "E ^F ^G A B c ^d e",
-      F: "F G A _B c _d e f",
-      "F#": "^F ^G ^A ^B ^c d ^e ^f",
-      G: "G A B c d _e ^f g",
-      Ab: "_A _B c _d _e _f g _a",
-      A: "A B ^c d e f ^g a",
-      Bb: "_B c d _e f _g a _b",
-      B: "B ^c ^d e ^f g ^a b",
-    },
+    scaleNotes: { ...SCALE_SPELLING_TEMPLATE.harmonicMajor },
+  },
+];
+
+export const CHORD_SCALES = [
+  {
+    name: "△7",
+    chord: "maj7",
+    scales: [
+      {
+        name: "Major",
+        distanceFromRoot: "P8",
+      },
+      {
+        name: "Major",
+        distanceFromRoot: "P5",
+      },
+      {
+        name: "Harmonic Minor",
+        distanceFromRoot: "M3",
+      },
+      {
+        name: "Harmonic Major",
+        distanceFromRoot: "P8",
+      },
+    ],
+  },
+  {
+    name: "△7(#5)",
+    chord: "+maj7",
+    scales: [
+      {
+        name: "Melodic Minor",
+        distanceFromRoot: "M6",
+      },
+      {
+        name: "Harmonic Minor",
+        distanceFromRoot: "M6",
+      },
+      {
+        name: "Harmonic Major",
+        distanceFromRoot: "P8",
+      },
+      {
+        name: "Harmonic Major",
+        distanceFromRoot: "M3",
+      },
+    ],
+  },
+  {
+    name: "-△7",
+    chord: "-maj7",
+    scales: [
+      {
+        name: "Melodic Minor",
+        distanceFromRoot: "P8",
+      },
+      {
+        name: "Harmonic Minor",
+        distanceFromRoot: "P8",
+      },
+      {
+        name: "Harmonic Minor",
+        distanceFromRoot: "M3",
+      },
+      {
+        name: "Harmonic Major",
+        distanceFromRoot: "P5",
+      },
+    ],
+  },
+  {
+    name: "-7",
+    chord: "-7",
+    scales: [
+      {
+        name: "Major",
+        distanceFromRoot: "M7",
+      },
+      {
+        name: "Major",
+        distanceFromRoot: "m3",
+      },
+      {
+        name: "Major",
+        distanceFromRoot: "m6",
+      },
+      {
+        name: "Melodic Minor",
+        distanceFromRoot: "m7",
+      },
+      {
+        name: "Harmonic Minor",
+        distanceFromRoot: "P5",
+      },
+      {
+        name: "Harmonic Major",
+        distanceFromRoot: "m6",
+      },
+    ],
+  },
+  {
+    name: "ø7",
+    chord: "m7b5",
+    scales: [
+      {
+        name: "Major",
+        distanceFromRoot: "m2",
+      },
+      {
+        name: "Melodic Minor",
+        distanceFromRoot: "m3",
+      },
+      {
+        name: "Melodic Minor",
+        distanceFromRoot: "m2",
+      },
+      {
+        name: "Harmonic Minor",
+        distanceFromRoot: "P5",
+      },
+      {
+        name: "Harmonic Minor",
+        distanceFromRoot: "m7",
+      },
+      {
+        name: "Harmonic Major",
+        distanceFromRoot: "m7",
+      },
+    ],
+  },
+  {
+    name: "7",
+    chord: "7",
+    scales: [
+      {
+        name: "Major",
+        distanceFromRoot: "P4",
+      },
+      {
+        name: "Melodic Minor",
+        distanceFromRoot: "P4",
+      },
+      {
+        name: "Melodic Minor",
+        distanceFromRoot: "P5",
+      },
+      {
+        name: "Harmonic Minor",
+        distanceFromRoot: "P4",
+      },
+      {
+        name: "Harmonic Major",
+        distanceFromRoot: "P4",
+      },
+      {
+        name: "Harmonic Major",
+        distanceFromRoot: "m6",
+      },
+    ],
+  },
+  {
+    name: "7b5",
+    chord: "7b5",
+    scales: [
+      {
+        name: "Melodic Minor",
+        distanceFromRoot: "P5",
+      },
+      {
+        name: "Melodic Minor",
+        distanceFromRoot: "m2",
+      },
+    ],
+  },
+  {
+    name: "7#5",
+    chord: "7#5",
+    scales: [
+      {
+        name: "Melodic Minor",
+        distanceFromRoot: "P4",
+      },
+      {
+        name: "Melodic Minor",
+        distanceFromRoot: "m2",
+      },
+      {
+        name: "Harmonic Minor",
+        distanceFromRoot: "P4",
+      },
+      {
+        name: "Harmonic Major",
+        distanceFromRoot: "m6",
+      },
+    ],
+  },
+  {
+    name: "7#9",
+    chord: "7#9",
+    scales: [
+      {
+        name: "Melodic Minor",
+        distanceFromRoot: "m2",
+      },
+      {
+        name: "Harmonic Major",
+        distanceFromRoot: "m6",
+      },
+    ],
+  },
+  {
+    name: "7sus4",
+    chord: "7sus4",
+    scales: [
+      {
+        name: "Major",
+        distanceFromRoot: "P4",
+      },
+      {
+        name: "Major",
+        distanceFromRoot: "m7",
+      },
+      {
+        name: "Major",
+        distanceFromRoot: "m3",
+      },
+      {
+        name: "Major",
+        distanceFromRoot: "m6",
+      },
+      {
+        name: "Melodic Minor",
+        distanceFromRoot: "P4",
+      },
+      {
+        name: "Melodic Minor",
+        distanceFromRoot: "m7",
+      },
+      {
+        name: "Harmonic Minor",
+        distanceFromRoot: "P4",
+      },
+      {
+        name: "Harmonic Major",
+        distanceFromRoot: "P4",
+      },
+    ],
+  },
+  {
+    name: "o7",
+    chord: "dim7",
+    scales: [
+      {
+        name: "Harmonic Minor",
+        distanceFromRoot: "m2",
+      },
+      {
+        name: "Harmonic Minor",
+        distanceFromRoot: "M3",
+      },
+      {
+        name: "Harmonic Minor",
+        distanceFromRoot: "P5",
+      },
+      {
+        name: "Harmonic Minor",
+        distanceFromRoot: "m7",
+      },
+      {
+        name: "Harmonic Major",
+        distanceFromRoot: "m2",
+      },
+      {
+        name: "Harmonic Major",
+        distanceFromRoot: "M3",
+      },
+      {
+        name: "Harmonic Major",
+        distanceFromRoot: "P5",
+      },
+      {
+        name: "Harmonic Major",
+        distanceFromRoot: "m7",
+      },
+    ],
   },
 ];

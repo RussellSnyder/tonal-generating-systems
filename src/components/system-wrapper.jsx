@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { DEFAULT_KEYS, TONAL_SYSTEMS } from '../data/tonal-systems'
+import { CHORD_SCALES, DEFAULT_KEYS, TONAL_SYSTEMS } from '../data/tonal-systems'
+import ChordScaleComponent from './chord-scale-component'
 import TonalSystem from './tonal-system'
 
 const CLEFS = [
@@ -87,6 +88,9 @@ function SystemWrapper({ keys = DEFAULT_KEYS }) {
           chordType={selectedChordType}
           octaveShift={octaveShift}
         />
+      ))}
+      {CHORD_SCALES.map((chordScale) => (
+        <ChordScaleComponent chord={chordScale.chord} scales={chordScale.scales} name={chordScale.name} root={selectedKey} clefValue={selectedClef} />
       ))}
     </>
   )
