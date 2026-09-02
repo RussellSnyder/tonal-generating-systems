@@ -4,19 +4,35 @@ import { Chord, Note, Scale } from "tonal";
 
 
 function noteNameToAbc(noteName) {
-  const match = /^([A-Ga-g])([#b]?)(\d+)$/.exec(noteName)
+  const match = /^([A-Ga-g])([#b]{1,2})?(\d+)$/.exec(noteName)
   if (!match) return noteName
 
-  const [, letter, accidental, octave] = match
-  const abcAccidental = accidental === 'b' ? '_' : accidental === '#' ? '^' : ''
-  const octaveNumber = Number(octave)
 
-  if (octaveNumber === 4) return `${abcAccidental}${letter}`
-  if (octaveNumber === 5) return `${abcAccidental}${letter.toLowerCase()}`
-  if (octaveNumber === 6) return `${abcAccidental}${letter.toLowerCase()}'`
+  const [, letter, accidental, octaveString] = match
+const octave = Number(octaveString ? octaveString : 4)
+  let abcAccidental = ''
+
+  switch(accidental) {
+    case 'bb':
+      abcAccidental = `__`
+      break;
+    case 'b':
+      abcAccidental = `_`
+      break;
+    case '#':
+      abcAccidental = `^`
+      break;
+    case '##':
+      abcAccidental = `^^`
+      break;
+  }
+
+  if (octave === 4) return `${abcAccidental}${letter}`
+  if (octave === 5) return `${abcAccidental}${letter.toLowerCase()}`
+  if (octave === 6) return `${abcAccidental}${letter.toLowerCase()}'`
 
   // generic fallback for other octaves
-  const diff = octaveNumber - 4
+  const diff = octave - 4
   const octaveMarker = diff > 0 ? "'".repeat(diff) : ",".repeat(Math.abs(diff))
   return `${abcAccidental}${letter.toLowerCase()}${octaveMarker}`
 }
@@ -33,7 +49,6 @@ function getAbcChordNotation(root, chord, scales, clefValue) {
     const chordNotes = Chord.notes(chord, root + 4).map(noteNameToAbc)
     const roots = scales.map(({distanceFromRoot}) => Note.transpose(root, distanceFromRoot))
     const scaleNotes = scales.map(({name}, i) => createABCScale(root, roots[i], name))
-
   const firstChord = `"${root}${chord}" [${chordNotes.join(' ')}]`
 
   const groupedScaleNotes = groupScalesForDisplay(scaleNotes)
@@ -81,7 +96,6 @@ function groupScalesForDisplay(scales) {
 
 function ChordScaleComponent({ name='yolo', chord="major seventh", scales=[], root = 'C', clefValue = 'treble' }) {
   const staffRef = useRef(null)
-  const groupedScales = groupScalesForDisplay(scales)
 
   useEffect(() => {
     if (!staffRef.current) {
