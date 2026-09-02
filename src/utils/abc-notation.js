@@ -34,6 +34,48 @@ export function noteNameToAbc(noteName) {
   return `${abcAccidental}${letter.toLowerCase()}${octaveMarker}`;
 }
 
+export function abcPitchToMidi(abcPitch) {
+  if (typeof abcPitch !== "string" || !abcPitch.trim()) {
+    return null;
+  }
+
+  const normalized = abcPitch.trim();
+  const match = normalized.match(/^([A-Ga-g])([#b]*)([',]*)$/);
+  if (!match) {
+    return null;
+  }
+
+  const [, noteLetter, accidental = "", octaveMarks] = match;
+  const letter = noteLetter.toUpperCase();
+  const semitoneMap = {
+    C: 0,
+    D: 2,
+    E: 4,
+    F: 5,
+    G: 7,
+    A: 9,
+    B: 11,
+  };
+
+  let midi = semitoneMap[letter];
+
+  if (accidental.includes("#")) {
+    midi += accidental.length;
+  }
+  if (accidental.includes("b")) {
+    midi -= accidental.length;
+  }
+
+  const octaveOffset =
+    (octaveMarks.match(/'/g) || []).length -
+    (octaveMarks.match(/,/g) || []).length;
+
+  const isLowercase = noteLetter === noteLetter.toLowerCase();
+  const octaveNumber = isLowercase ? 5 + octaveOffset : 4 + octaveOffset;
+
+  return (octaveNumber + 1) * 12 + midi;
+}
+
 export function createABCScale(root, scaleRoot, scale) {
   const range = Scale.rangeOf(`${scaleRoot} ${scale}`);
   const rangeStart = root.toUpperCase() + "4";

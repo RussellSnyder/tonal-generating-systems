@@ -1,5 +1,6 @@
 import ABCJS from 'abcjs'
 import { useEffect } from 'react'
+import { abcPitchToMidi } from '../utils/abc-notation'
 
 function toNextOctave(noteToken) {
   return noteToken?.replace(/^([_^]*)([A-Ga-g])([',]*)$/, (_, accidental, note, octaveMarks) => {
@@ -80,6 +81,43 @@ function toChordRoot(noteToken) {
   return `${noteLetter}${accidental}`
 }
 
+function playMidiNotes(midiValues) {
+  const validMidiValues = (midiValues || [])
+    .filter((value) => typeof value === 'number' && Number.isFinite(value))
+
+  if (validMidiValues.length === 0) {
+    return
+  }
+
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext
+  if (!AudioContextClass) {
+    return
+  }
+
+  const audioContext = new AudioContextClass()
+  const startTime = audioContext.currentTime
+
+  validMidiValues.forEach((midiValue, index) => {
+    const oscillator = audioContext.createOscillator()
+    const gainNode = audioContext.createGain()
+    const noteStart = startTime + index * 0.08
+    const frequency = 440 * 2 ** ((midiValue - 69) / 12)
+
+    oscillator.type = 'triangle'
+    oscillator.frequency.setValueAtTime(frequency, noteStart)
+
+    gainNode.gain.setValueAtTime(0.0001, noteStart)
+    gainNode.gain.exponentialRampToValueAtTime(0.18, noteStart + 0.02)
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, noteStart + 0.8)
+
+    oscillator.connect(gainNode)
+    gainNode.connect(audioContext.destination)
+
+    oscillator.start(noteStart)
+    oscillator.stop(noteStart + 0.85)
+  })
+}
+
 function TonalSystem({
   system,
   keyValue = 'C',
@@ -158,7 +196,24 @@ T:${system.title}
 V:1 clef=${clefValue}
 L:4/4
 ${chordProgression}`,
-  { responsive: 'resize' },
+      {
+        responsive: 'resize',
+        clickListener: (abcElem) => {
+          if (!abcElem || abcElem.el_type !== 'note') {
+            return
+          }
+
+          const abcPitchNames = (abcElem.pitches || []).map(({ name }) => name)
+          console.log({abcPitchNames})
+          const midiValues = abcPitchNames
+            .map(abcPitchToMidi)
+            .filter((value) => value != null)
+
+            console.log(midiValues)
+
+          playMidiNotes(midiValues)
+        },
+      },
     )
   }, [chordProgression, clefValue, octaveShift, selectedKey, system])
 
