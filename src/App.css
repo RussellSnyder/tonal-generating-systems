@@ -31,10 +31,11 @@ nav a.active {
 }
 
 .system-controls {
-  align-items: center;
+  align-items: start;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, max-content);
   gap: 12px;
+  justify-content: center;
   margin-bottom: 40px;
 }
 
@@ -45,8 +46,9 @@ nav a.active {
 
 .system-controls label {
   color: var(--text);
+  display: block;
   font-size: 0.9rem;
-  margin-right: 10px;
+  margin-bottom: 6px;
 }
 
 .system-controls select {
@@ -82,8 +84,7 @@ nav a.active {
 
 .page {
   flex: 1;
-  max-width: 760px;
-  padding: 16vh clamp(20px, 8vw, 112px);
+  padding: 8vh clamp(20px, 8vw, 112px);
   text-align: left;
 }
 
@@ -124,6 +125,10 @@ h1 {
   color: white;
 }
 
+.chord-scale-page {
+  margin-top: 40px;
+}
+
 @media (max-width: 600px) {
   .site-header {
     padding: 20px;
@@ -142,6 +147,14 @@ h1 {
   }
 }
 
+.chord-scale-header {
+  font-weight: bold;
+  margin-bottom: -15px;
+}
+.chord-scale-root {
+  margin-left: 15px;
+}
+
 @media print {
   .site-header {
     border-bottom: none;
@@ -157,11 +170,26 @@ h1 {
 
   .brand {
     color: #000;
-    padding: 8px 0;
+    padding: 8px;
   }
 
   .page {
     max-width: none;
     padding: 0;
+  }
+
+  .chord-scale-page {
+    margin-top: 40px;
+    break-before: page;
+    page-break-before: always;
+  }
+
+  .chord-scale-page > .chord-scale-component:nth-child(5) {
+    background-color: aqua;
+    break-after: page;
+    page-break-after: always;
+  }
+  .chord-scale-page > .chord-scale-component:nth-child(6) {
+    margin-top: 10px;
   }
 }

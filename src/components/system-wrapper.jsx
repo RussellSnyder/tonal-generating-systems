@@ -14,8 +14,8 @@ const CLEFS = [
 ];
 
 const NUMBER_OF_NOTES_IN_CHORD = [
-  { value: 4, label: "4 - Seventh Chords" },
-  { value: 3, label: "3 - Triads" },
+  { value: 4, label: "Seventh Chords (4 notes)" },
+  { value: 3, label: "Triads (3 notes)" },
 ];
 
 function SystemWrapper() {
@@ -45,7 +45,7 @@ function SystemWrapper() {
           </select>
         </div>
         <div>
-          <label htmlFor="clef-select">Choose a clef</label>
+          <label htmlFor="clef-select">Clef</label>
           <select
             id="clef-select"
             value={selectedClef}
@@ -59,9 +59,7 @@ function SystemWrapper() {
           </select>
         </div>
         <div>
-          <label htmlFor="number-of-notes-select">
-            Number of Notes in Chord
-          </label>
+          <label htmlFor="number-of-notes-select">Number of Notes</label>
           <select
             id="number-of-notes-select"
             value={selectedNumberOfNotesInChord}
@@ -86,15 +84,17 @@ function SystemWrapper() {
           numberOfNotesInChord={Number(selectedNumberOfNotesInChord)}
         />
       ))}
-      {CHORD_SCALES.map((chordScale) => (
-        <ChordScaleComponent
-          chord={chordScale.chord}
-          scales={chordScale.scales}
-          name={chordScale.name}
-          root={selectedRoot}
-          clefValue={selectedClef}
-        />
-      ))}
+      <div className="chord-scale-page">
+        {CHORD_SCALES.map((chordScale) => (
+          <ChordScaleComponent
+            chord={chordScale.chord}
+            scales={chordScale.scales}
+            name={chordScale.name}
+            root={selectedRoot}
+            clefValue={selectedClef}
+          />
+        ))}
+      </div>
     </>
   );
 }

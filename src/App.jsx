@@ -1,22 +1,24 @@
-import { useEffect, useState } from 'react'
-import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom'
-import './App.css'
-import SystemWrapper from './components/system-wrapper'
+import { useEffect, useState } from "react";
+import { BrowserRouter, NavLink, Route, Routes } from "react-router-dom";
+import "./App.css";
+import SystemWrapper from "./components/system-wrapper";
 
 function Home() {
   return (
     <main className="page">
       <SystemWrapper />
     </main>
-  )
+  );
 }
 
 function About() {
   return (
     <main className="page">
-      <p className="intro">Tool for generating tonal systems in different keys</p>
+      <p className="intro">
+        Tool for generating tonal systems in different keys
+      </p>
     </main>
-  )
+  );
 }
 
 function NotFound() {
@@ -28,15 +30,15 @@ function NotFound() {
         Return home
       </NavLink>
     </main>
-  )
+  );
 }
 
 function App() {
-  const [isDarkMode, setIsDarkMode] = useState(true)
+  const [isDarkMode, setIsDarkMode] = useState(true);
 
   useEffect(() => {
-    document.documentElement.dataset.theme = isDarkMode ? 'dark' : 'light'
-  }, [isDarkMode])
+    document.documentElement.dataset.theme = isDarkMode ? "dark" : "light";
+  }, [isDarkMode]);
 
   return (
     <BrowserRouter>
@@ -46,14 +48,14 @@ function App() {
         </NavLink>
         <nav aria-label="Main navigation">
           <NavLink
-            className={({ isActive }) => (isActive ? 'active' : '')}
+            className={({ isActive }) => (isActive ? "active" : "")}
             to="/"
             end
           >
             Home
           </NavLink>
           <NavLink
-            className={({ isActive }) => (isActive ? 'active' : '')}
+            className={({ isActive }) => (isActive ? "active" : "")}
             to="/about"
           >
             About
@@ -66,7 +68,7 @@ function App() {
           aria-checked={isDarkMode}
           onClick={() => setIsDarkMode((enabled) => !enabled)}
         >
-          {isDarkMode ? 'Light mode' : 'Dark mode'}
+          {isDarkMode ? "Light mode" : "Dark mode"}
         </button>
       </header>
       <Routes>
@@ -75,7 +77,7 @@ function App() {
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
-  )
+  );
 }
 
-export default App
+export default App;
