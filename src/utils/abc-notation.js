@@ -25,6 +25,8 @@ export function noteNameToAbc(noteName) {
       break;
   }
 
+  if (octave === 2) return `${abcAccidental}${letter},,`;
+  if (octave === 3) return `${abcAccidental}${letter},`;
   if (octave === 4) return `${abcAccidental}${letter}`;
   if (octave === 5) return `${abcAccidental}${letter.toLowerCase()}`;
   if (octave === 6) return `${abcAccidental}${letter.toLowerCase()}'`;
@@ -32,6 +34,20 @@ export function noteNameToAbc(noteName) {
   const diff = octave - 4;
   const octaveMarker = diff > 0 ? "'".repeat(diff) : ",".repeat(Math.abs(diff));
   return `${abcAccidental}${letter.toLowerCase()}${octaveMarker}`;
+}
+
+export function abcNoteToName(abcNote) {
+  if (typeof abcNote !== "string") return abcNote;
+
+  const match = /^([_^]*)([A-Ga-g])([',]*)$/.exec(abcNote.trim());
+  if (!match) return abcNote;
+
+  const [, accidental, letter] = match;
+  const noteAccidental = accidental.startsWith("^")
+    ? "#".repeat(accidental.length)
+    : "b".repeat(accidental.length);
+
+  return `${letter.toUpperCase()}${noteAccidental}`;
 }
 
 export function abcPitchToMidi(abcPitch) {
@@ -108,4 +124,13 @@ export function groupScalesForDisplay(scales) {
   }
 
   return [scales];
+}
+
+export function tonal_getNoteAndOctave(noteOctaveString) {
+  const match = noteOctaveString.match(/^([A-Ga-g])([#b]?)(\d)$/);
+
+  return {
+    note: `${match[1]}${match[2]}`,
+    octave: Number(match[3]),
+  };
 }

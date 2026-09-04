@@ -13,6 +13,12 @@ export const DEFAULT_KEYS = [
   "B",
 ];
 
+export const SUPPORTED_OCTAVES = [2, 3, 4, 5];
+
+export const SUPPORTED_ROOTS = SUPPORTED_OCTAVES.flatMap((octave) =>
+  DEFAULT_KEYS.map((key) => `${key}${octave}`),
+);
+
 const SCALE_SPELLING_TEMPLATE = {
   major: {
     C: ["C", "D", "E", "F", "G", "A", "B"],
@@ -86,33 +92,34 @@ export const TONAL_SYSTEMS = [
     abcId: 2,
     title: "Major",
     ariaLabel: "major scale notation",
-    chordQualities: ["maj7", "m7", "m7", "maj7", "7", "m7", "m7b5"],
-    triadTypes: [
-      "major",
-      "minor",
-      "minor",
-      "major",
-      "major",
-      "minor",
-      "diminished",
+    scale: "major",
+    chordQualities: [
+      { label: "△7", value: "maj7" },
+      { label: "-7", value: "m7" },
+      { label: "-7", value: "m7" },
+      { label: "△7", value: "maj7" },
+      { label: "7", value: "7" },
+      { label: "-7", value: "m7" },
+      { label: "ø7", value: "m7b5" },
     ],
-    scaleNotes: { ...SCALE_SPELLING_TEMPLATE.major },
+    triadQualities: ["maj", "min", "min", "maj", "maj", "min", "dim"],
   },
   {
     id: "abc-melodic-minor",
     abcId: 3,
     title: "Melodic Minor",
     ariaLabel: "melodic minor notation",
-    chordQualities: ["mMaj7", "m7", "maj7#5", "7", "7", "m7b5", "m7b5"],
-    triadTypes: [
-      "minor",
-      "minor",
-      "augmented",
-      "major",
-      "major",
-      "diminished",
-      "diminished",
+    scale: "melodic Minor",
+    chordQualities: [
+      { label: "-△7", value: "-maj7" },
+      { label: "-7", value: "m7" },
+      { label: "+△7", value: "maj7#5" },
+      { label: "7", value: "7" },
+      { label: "7", value: "7" },
+      { label: "ø7", value: "m7b5" },
+      { label: "ø7", value: "m7b5" },
     ],
+    triadQualities: ["min", "min", "aug", "maj", "maj", "dim", "dim"],
     extraChords: [
       {
         afterDegree: 6,
@@ -139,17 +146,18 @@ export const TONAL_SYSTEMS = [
     id: "abc-harmonic-minor",
     abcId: 4,
     title: "Harmonic Minor",
+    scale: "harmonic minor",
     ariaLabel: "harmonic minor notation",
-    chordQualities: ["mMaj7", "m7b5", "maj7#5", "m7", "7", "maj7", "dim7"],
-    triadTypes: [
-      "minor",
-      "diminished",
-      "augmented",
-      "minor",
-      "major",
-      "major",
-      "diminished",
+    chordQualities: [
+      { label: "-△7", value: "-maj7" },
+      { label: "ø7", value: "m7b5" },
+      { label: "+△7", value: "maj7#5" },
+      { label: "-7", value: "min7" },
+      { label: "7", value: "7" },
+      { label: "△7", value: "maj7" },
+      { label: "o7", value: "dim7" },
     ],
+    triadQualities: ["min", "dim", "aug", "min", "maj", "maj", "dim"],
     extraChords: [
       {
         afterDegree: 3,
@@ -176,17 +184,18 @@ export const TONAL_SYSTEMS = [
     id: "abc-harmonic-major",
     abcId: 5,
     title: "Harmonic Major",
+    scale: "harmonic major",
     ariaLabel: "harmonic major notation",
-    chordQualities: ["maj7", "m7b5", "m7", "mMaj7", "7", "maj7#5", "dim7"],
-    triadTypes: [
-      "major",
-      "diminished",
-      "minor",
-      "minor",
-      "major",
-      "augmented",
-      "diminished",
+    chordQualities: [
+      { label: "△7", value: "maj7" },
+      { label: "ø7", value: "m7b5" },
+      { label: "min7", value: "min7" },
+      { label: "-△7", value: "-maj7" },
+      { label: "7", value: "7" },
+      { label: "+△7", value: "maj7#5" },
+      { label: "o7", value: "dim7" },
     ],
+    triadQualities: ["maj", "dim", "min", "min", "maj", "aug", "dim"],
     extraChords: [
       {
         afterDegree: 0,
@@ -234,7 +243,7 @@ export const CHORD_SCALES = [
     scales: [
       {
         name: "Major",
-        distanceFromRoot: "P8",
+        distanceFromRoot: "P1",
       },
       {
         name: "Major",
@@ -246,7 +255,7 @@ export const CHORD_SCALES = [
       },
       {
         name: "Harmonic Major",
-        distanceFromRoot: "P8",
+        distanceFromRoot: "P1",
       },
     ],
   },
@@ -264,7 +273,7 @@ export const CHORD_SCALES = [
       },
       {
         name: "Harmonic Major",
-        distanceFromRoot: "P8",
+        distanceFromRoot: "P1",
       },
       {
         name: "Harmonic Major",
@@ -278,11 +287,11 @@ export const CHORD_SCALES = [
     scales: [
       {
         name: "Melodic Minor",
-        distanceFromRoot: "P8",
+        distanceFromRoot: "P1",
       },
       {
         name: "Harmonic Minor",
-        distanceFromRoot: "P8",
+        distanceFromRoot: "P1",
       },
       {
         name: "Harmonic Minor",

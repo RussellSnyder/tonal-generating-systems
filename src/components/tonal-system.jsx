@@ -1,192 +1,80 @@
-import ABCJS from 'abcjs'
-import { useEffect } from 'react'
-import { abcPitchToMidi } from '../utils/abc-notation'
-
-function toNextOctave(noteToken) {
-  return noteToken?.replace(/^([_^]*)([A-Ga-g])([',]*)$/, (_, accidental, note, octaveMarks) => {
-    return note === note.toUpperCase()
-      ? `${accidental}${note.toLowerCase()}${octaveMarks}`
-      : `${accidental}${note}${octaveMarks}'`
-  })
-}
-
-function toLowerOctave(noteToken) {
-  return noteToken?.replace(/^([_^]*)([A-Ga-g])([',]*)$/, (_, accidental, note, octaveMarks) => {
-    if (octaveMarks.endsWith("'")) {
-      return `${accidental}${note}${octaveMarks.slice(0, -1)}`
-    }
-
-    return note === note.toLowerCase()
-      ? `${accidental}${note.toUpperCase()}`
-      : `${accidental}${note},`
-  })
-}
-
-function shiftOctave(noteToken, octaveShift) {
-  return Array.from({ length: Math.abs(octaveShift) }).reduce(
-    (shiftedNote) => {
-      if (octaveShift < 0) {
-        return toLowerOctave(shiftedNote)
-      }
-
-      return shiftedNote.replace(/^([_^]*)([A-Ga-g])([',]*)$/, (_, accidental, note, octaveMarks) => {
-        if (octaveMarks.endsWith(',')) {
-          return `${accidental}${note}${octaveMarks.slice(0, -1)}`
-        }
-
-        return note === note.toUpperCase()
-          ? `${accidental}${note.toLowerCase()}`
-          : `${accidental}${note}'`
-      })
-    },
-    noteToken,
-  )
-}
-
-function alterNote(noteToken, semitones) {
-  if (!Number.isInteger(semitones) || semitones < -2 || semitones > 2) {
-    return noteToken
-  }
-
-  const noteMatch = noteToken.match(/^([_^]*)([A-Ga-g])$/)
-  if (!noteMatch) {
-    return noteToken
-  }
-
-  const [, accidental, note] = noteMatch
-  const currentAccidental = accidental.startsWith('^')
-    ? accidental.length
-    : -accidental.length
-  const adjustedAccidental = currentAccidental + semitones
-
-  if (adjustedAccidental < -2 || adjustedAccidental > 2) {
-    return noteToken
-  }
-
-  const accidentalSymbol = adjustedAccidental > 0
-    ? '^'.repeat(adjustedAccidental)
-    : '_'.repeat(-adjustedAccidental)
-
-  return `${accidentalSymbol}${note}`
-}
-
-function toChordRoot(noteToken) {
-  const noteLetter = noteToken.slice(-1).toUpperCase()
-  const accidental = noteToken.startsWith('^')
-    ? '#'
-    : noteToken.startsWith('_')
-      ? 'b'
-      : ''
-
-  return `${noteLetter}${accidental}`
-}
+import ABCJS from "abcjs";
+import { useEffect } from "react";
+import { Chord, Range, Scale } from "tonal";
+import {
+  abcPitchToMidi,
+  noteNameToAbc,
+  tonal_getNoteAndOctave,
+} from "../utils/abc-notation";
 
 function playMidiNotes(midiValues) {
-  const validMidiValues = (midiValues || [])
-    .filter((value) => typeof value === 'number' && Number.isFinite(value))
+  const validMidiValues = (midiValues || []).filter(
+    (value) => typeof value === "number" && Number.isFinite(value),
+  );
 
   if (validMidiValues.length === 0) {
-    return
+    return;
   }
 
-  const AudioContextClass = window.AudioContext || window.webkitAudioContext
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
   if (!AudioContextClass) {
-    return
+    return;
   }
 
-  const audioContext = new AudioContextClass()
-  const startTime = audioContext.currentTime
+  const audioContext = new AudioContextClass();
+  const startTime = audioContext.currentTime;
 
   validMidiValues.forEach((midiValue, index) => {
-    const oscillator = audioContext.createOscillator()
-    const gainNode = audioContext.createGain()
-    const noteStart = startTime + index * 0.08
-    const frequency = 440 * 2 ** ((midiValue - 69) / 12)
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    const noteStart = startTime + index * 0.08;
+    const frequency = 440 * 2 ** ((midiValue - 69) / 12);
 
-    oscillator.type = 'triangle'
-    oscillator.frequency.setValueAtTime(frequency, noteStart)
+    oscillator.type = "triangle";
+    oscillator.frequency.setValueAtTime(frequency, noteStart);
 
-    gainNode.gain.setValueAtTime(0.0001, noteStart)
-    gainNode.gain.exponentialRampToValueAtTime(0.18, noteStart + 0.02)
-    gainNode.gain.exponentialRampToValueAtTime(0.0001, noteStart + 0.8)
+    gainNode.gain.setValueAtTime(0.0001, noteStart);
+    gainNode.gain.exponentialRampToValueAtTime(0.18, noteStart + 0.02);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, noteStart + 0.8);
 
-    oscillator.connect(gainNode)
-    gainNode.connect(audioContext.destination)
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
 
-    oscillator.start(noteStart)
-    oscillator.stop(noteStart + 0.85)
-  })
+    oscillator.start(noteStart);
+    oscillator.stop(noteStart + 0.85);
+  });
 }
 
 function TonalSystem({
   system,
-  keyValue = 'C',
-  clefValue = 'treble',
-  chordType = 'four-note',
+  root = "C4",
+  clefValue = "treble",
+  numberOfNotesInChord,
   octaveShift = 0,
 }) {
-  const selectedKey = keyValue
-  const rawScaleNotes = system.scaleNotes?.[selectedKey] ?? system.scaleNotes?.C ?? []
-  const scaleDegrees = Array.isArray(rawScaleNotes)
-    ? rawScaleNotes
-    : String(rawScaleNotes).split(' ').filter(Boolean)
-  const isTriad = chordType === 'triad'
-  const triadQualityMap = {
-    major: 'maj',
-    minor: 'min',
-    diminished: 'dim',
-    augmented: 'aug',
-  }
-  const createChord = (
-    degree,
-    chordQuality = isTriad
-      ? triadQualityMap[system.triadTypes?.[degree]] ?? 'maj'
-      : system.chordQualities[degree],
-    noteAlterations = {},
-    showSymbol = true,
-    noteDegrees = isTriad ? [0, 2, 4] : [0, 2, 4, 6],
-    rootDegree = degree,
-    parenthesized = false,
-  ) => {
-    const chordNotes = noteDegrees.map((interval, noteIndex) => {
-      const scaleIndex = degree + interval
-      const noteToken = scaleDegrees[scaleIndex]
-      const chordNote = noteToken ?? toNextOctave(scaleDegrees[scaleIndex - 7])
+  const { note, octave } = tonal_getNoteAndOctave(root);
 
-      return alterNote(chordNote, noteAlterations[noteIndex])
+  const tonal_scale = Scale.get(`${root} ${system.scale}`).notes;
+
+  const tonal_chords = tonal_scale.map((note, i) =>
+    Range.numeric([0, numberOfNotesInChord - 1]).map(
+      Chord.steps(system.chordQualities[i].value, note),
+    ),
+  );
+
+  const abc_chords = tonal_chords.map((chord) => chord.map(noteNameToAbc));
+  const abc_chordString = abc_chords
+    .map((chord, i) => {
+      let symbol;
+      if (numberOfNotesInChord === 3) {
+        symbol = system.triadQualities[i];
+      } else {
+        symbol = system.chordQualities[i].label;
+      }
+
+      return `"${tonal_getNoteAndOctave(tonal_scale[i]).note}${symbol}" [${chord.join(" ")}]`;
     })
-    const renderedChordNotes = chordNotes.map((note) =>
-      shiftOctave(note, octaveShift),
-    )
-    const chordRoot = toChordRoot(scaleDegrees[rootDegree])
-    const chordLabel = parenthesized
-      ? `(${chordRoot}${chordQuality})`
-      : `${chordRoot}${chordQuality}`
-    const chordSymbol = `"${chordLabel}"`
-    const renderedChord = showSymbol
-      ? `${chordSymbol}[${renderedChordNotes.join('')}]`
-      : `[${renderedChordNotes.join('')}]`
-
-    return renderedChord
-  }
-
-  const chordEntries = Array.from({ length: 7 }, (unused, degree) => [
-    { notation: createChord(degree) },
-    ...((isTriad ? [] : system.extraChords ?? [])
-      .filter((extraChord) => extraChord.afterDegree === degree)
-      .map((extraChord) => ({
-        notation: createChord(
-          extraChord.degree,
-          extraChord.quality,
-          extraChord.noteAlterations,
-          extraChord.showSymbol,
-          extraChord.noteDegrees,
-          extraChord.rootDegree,
-          extraChord.parenthesized,
-        ),
-      }))),
-  ]).flat()
-  const chordProgression = chordEntries.map((entry) => entry.notation).join(' ')
+    .join("|");
 
   useEffect(() => {
     ABCJS.renderAbc(
@@ -195,34 +83,26 @@ function TonalSystem({
 T:${system.title}
 V:1 clef=${clefValue}
 L:4/4
-${chordProgression}`,
+${abc_chordString}`,
       {
-        responsive: 'resize',
+        responsive: "resize",
         clickListener: (abcElem) => {
-          if (!abcElem || abcElem.el_type !== 'note') {
-            return
+          if (!abcElem || abcElem.el_type !== "note") {
+            return;
           }
 
-          const abcPitchNames = (abcElem.pitches || []).map(({ name }) => name)
-          console.log({abcPitchNames})
+          const abcPitchNames = (abcElem.pitches || []).map(({ name }) => name);
           const midiValues = abcPitchNames
             .map(abcPitchToMidi)
-            .filter((value) => value != null)
+            .filter((value) => value != null);
 
-            console.log(midiValues)
-
-          playMidiNotes(midiValues)
+          playMidiNotes(midiValues);
         },
       },
-    )
-  }, [chordProgression, clefValue, octaveShift, selectedKey, system])
+    );
+  }, [abc_chordString, clefValue, octaveShift, root, system]);
 
-  return (
-    <section
-      id={system.id}
-      aria-label={`${selectedKey} ${system.ariaLabel}`}
-    />
-  )
+  return <section id={system.id} aria-label={`${root} ${system.ariaLabel}`} />;
 }
 
-export default TonalSystem
+export default TonalSystem;

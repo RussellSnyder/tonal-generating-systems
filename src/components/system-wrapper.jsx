@@ -1,36 +1,43 @@
-import { useState } from 'react'
-import { CHORD_SCALES, DEFAULT_KEYS, TONAL_SYSTEMS } from '../data/tonal-systems'
-import ChordScaleComponent from './chord-scale-component'
-import TonalSystem from './tonal-system'
+import { useState } from "react";
+import {
+  CHORD_SCALES,
+  SUPPORTED_ROOTS,
+  TONAL_SYSTEMS,
+} from "../data/tonal-systems";
+import ChordScaleComponent from "./chord-scale-component";
+import TonalSystem from "./tonal-system";
 
 const CLEFS = [
-  { value: 'treble', label: 'Treble' },
-  { value: 'bass', label: 'Bass' },
-  { value: 'alto', label: 'Alto' },
-]
+  { value: "treble", label: "Treble" },
+  { value: "bass", label: "Bass" },
+  { value: "alto", label: "Alto" },
+];
 
-const CHORD_TYPES = [
-  { value: 'four-note', label: '4-note chords' },
-  { value: 'triad', label: 'Triads' },
-]
+const NUMBER_OF_NOTES_IN_CHORD = [
+  { value: 4, label: "4 - Seventh Chords" },
+  { value: 3, label: "3 - Triads" },
+];
 
-function SystemWrapper({ keys = DEFAULT_KEYS }) {
-  const [selectedKey, setSelectedKey] = useState(keys[0])
-  const [selectedClef, setSelectedClef] = useState(CLEFS[0].value)
-  const [selectedChordType, setSelectedChordType] = useState(CHORD_TYPES[0].value)
-  const [octaveShift, setOctaveShift] = useState(0)
+function SystemWrapper() {
+  const [selectedRoot, setSelectedRoot] = useState(SUPPORTED_ROOTS[24]);
+  const [selectedClef, setSelectedClef] = useState(CLEFS[0].value);
+  const [selectedNumberOfNotesInChord, setSelectedNumberOfNotesInChord] =
+    useState(NUMBER_OF_NOTES_IN_CHORD[0].value);
 
   return (
     <>
-      <section className="system-controls" aria-labelledby="system-controls-title">
+      <section
+        className="system-controls"
+        aria-labelledby="system-controls-title"
+      >
         <div>
-          <label htmlFor="key-select">Choose a key</label>
+          <label htmlFor="root-select">Root</label>
           <select
-            id="key-select"
-            value={selectedKey}
-            onChange={(event) => setSelectedKey(event.target.value)}
+            id="root-select"
+            value={selectedRoot}
+            onChange={(event) => setSelectedRoot(event.target.value)}
           >
-            {keys.map((key) => (
+            {SUPPORTED_ROOTS.map((key) => (
               <option key={key} value={key}>
                 {key}
               </option>
@@ -52,30 +59,21 @@ function SystemWrapper({ keys = DEFAULT_KEYS }) {
           </select>
         </div>
         <div>
-          <label htmlFor="chord-type-select">Choose chord type</label>
+          <label htmlFor="number-of-notes-select">
+            Number of Notes in Chord
+          </label>
           <select
-            id="chord-type-select"
-            value={selectedChordType}
-            onChange={(event) => setSelectedChordType(event.target.value)}
+            id="number-of-notes-select"
+            value={selectedNumberOfNotesInChord}
+            onChange={(event) =>
+              setSelectedNumberOfNotesInChord(event.target.value)
+            }
           >
-            {CHORD_TYPES.map((chordType) => (
+            {NUMBER_OF_NOTES_IN_CHORD.map((chordType) => (
               <option key={chordType.value} value={chordType.value}>
                 {chordType.label}
               </option>
             ))}
-          </select>
-        </div>
-        <div>
-          <label htmlFor="octave-select">Choose an octave</label>
-          <select
-            id="octave-select"
-            value={octaveShift}
-            onChange={(event) => setOctaveShift(Number(event.target.value))}
-          >
-            <option value={1}>Start at {selectedKey}5</option>
-            <option value={0}>Start at {selectedKey}4</option>
-            <option value={-1}>Start at {selectedKey}3</option>
-            <option value={-2}>Start at {selectedKey}2</option>
           </select>
         </div>
       </section>
@@ -83,17 +81,22 @@ function SystemWrapper({ keys = DEFAULT_KEYS }) {
         <TonalSystem
           key={system.id}
           system={system}
-          keyValue={selectedKey}
+          root={selectedRoot}
           clefValue={selectedClef}
-          chordType={selectedChordType}
-          octaveShift={octaveShift}
+          numberOfNotesInChord={Number(selectedNumberOfNotesInChord)}
         />
       ))}
       {CHORD_SCALES.map((chordScale) => (
-        <ChordScaleComponent chord={chordScale.chord} scales={chordScale.scales} name={chordScale.name} root={selectedKey} clefValue={selectedClef} />
+        <ChordScaleComponent
+          chord={chordScale.chord}
+          scales={chordScale.scales}
+          name={chordScale.name}
+          root={selectedRoot}
+          clefValue={selectedClef}
+        />
       ))}
     </>
-  )
+  );
 }
 
-export default SystemWrapper
+export default SystemWrapper;
