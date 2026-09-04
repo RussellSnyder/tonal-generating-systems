@@ -1,11 +1,7 @@
 import ABCJS from "abcjs";
-import { useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { Chord, Note, Range, Scale } from "tonal";
-import {
-  abcPitchToMidi,
-  noteNameToAbc,
-  tonal_getNoteAndOctave,
-} from "../utils/abc-notation";
+import { noteNameToAbc, tonal_getNoteAndOctave } from "../utils/abc-notation";
 
 function playMidiNotes(midiValues) {
   const validMidiValues = (midiValues || []).filter(
@@ -27,7 +23,7 @@ function playMidiNotes(midiValues) {
   validMidiValues.forEach((midiValue, index) => {
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
-    const noteStart = startTime + index * 0.08;
+    const noteStart = startTime + index * 0.02;
     const frequency = 440 * 2 ** ((midiValue - 69) / 12);
 
     oscillator.type = "triangle";
@@ -52,6 +48,10 @@ function TonalSystem({
   numberOfNotesInChord,
   octaveShift = 0,
 }) {
+  const sectionRef = useRef(null);
+  const selectedChordIndexRef = useRef(0);
+  const visualObjRef = useRef(null);
+  const highlightedElementsRef = useRef([]);
   const { note } = tonal_getNoteAndOctave(root);
 
   const tonal_scale = Scale.get(`${root} ${system.scale}`).notes;
@@ -63,13 +63,19 @@ function TonalSystem({
   );
 
   const chordEntries = tonal_scale.flatMap((note, i) => {
-    const chord = tonal_chords[i].map(noteNameToAbc).map((note) => `${note}4`);
+    const tonalChord = tonal_chords[i];
+    const chord = tonalChord.map(noteNameToAbc).map((note) => `${note}4`);
     const symbol =
       numberOfNotesInChord === 3
         ? system.triadQualities[i]
         : system.chordQualities[i].label;
     const entries = [
-      `"${tonal_getNoteAndOctave(tonal_scale[i]).note}${symbol}" [${chord.join(" ")}]`,
+      {
+        notation: `"${tonal_getNoteAndOctave(tonal_scale[i]).note}${symbol}" [${chord.join(" ")}]`,
+        midiValues: tonalChord.map((chordNote) =>
+          Note.midi(/\d/.test(chordNote) ? chordNote : `${chordNote}4`),
+        ),
+      },
     ];
 
     if (numberOfNotesInChord === 3) {
@@ -84,7 +90,6 @@ function TonalSystem({
         const tonal_extraChordNotes = intervalsInRelationToRoot.map(
           (interval) => Note.transpose(root, interval),
         );
-        console.log({ tonal_extraChordNotes });
         const abc_extraChordNotes = (tonal_extraChordNotes ?? [])
           .map(noteNameToAbc)
           .map((note) => `${note}`);
@@ -98,21 +103,97 @@ function TonalSystem({
         const symbolText =
           extraChord.showSymbol === false ? "" : `"${displayedLabel}" `;
 
-        return `${symbolText}[${abc_extraChordNotes.join(" ")}]`;
+        return {
+          notation: `${symbolText}[${abc_extraChordNotes.join(" ")}]`,
+          midiValues: tonal_extraChordNotes.map((extraNote) =>
+            Note.midi(extraNote),
+          ),
+        };
       });
 
     return [...entries, ...extraChords];
   });
 
-  const abc_chordString = chordEntries.join(" ");
+  const abc_chordString = chordEntries
+    .map(({ notation }) => notation)
+    .join(" ");
+  const chordMidiValues = chordEntries.map(({ midiValues }) => midiValues);
+  const abcPrefix = `X:${system.abcId}\nV:1 clef=${clefValue}\nL:1/4\n`;
+  const chordRanges = chordEntries.reduce((ranges, entry, index) => {
+    const previousEnd = ranges[index - 1]?.end ?? abcPrefix.length;
+    const start = index === 0 ? abcPrefix.length : previousEnd + 1;
+
+    return [...ranges, { start, end: start + entry.notation.length }];
+  }, []);
+
+  const highlightChord = useCallback(
+    (index) => {
+      const engraver = visualObjRef.current?.[0]?.engraver;
+      const range = chordRanges[index];
+      if (!engraver || !range) {
+        return;
+      }
+
+      const isDarkMode = document.documentElement.dataset.theme === "dark";
+      const highlightColor = isDarkMode ? "#ffbfa1" : "#ffcc00";
+      const normalColor = isDarkMode ? "#rgb(156, 163, 175)" : "#000";
+
+      highlightedElementsRef.current.forEach((element) =>
+        element.unhighlight("tonal-system-chord-selected", normalColor),
+      );
+
+      highlightedElementsRef.current = (engraver.selectables || [])
+        .filter((selectable) => {
+          const startChar = selectable.absEl?.abcelem?.startChar;
+          return (
+            Number.isFinite(startChar) &&
+            startChar >= range.start &&
+            startChar <= range.end
+          );
+        })
+        .map((selectable) => selectable.absEl)
+        .filter(Boolean);
+
+      highlightedElementsRef.current.forEach((element) =>
+        element.highlight("tonal-system-chord-selected", highlightColor),
+      );
+    },
+    [chordRanges],
+  );
+
+  const handleKeyDown = (event) => {
+    if (event.key === " ") {
+      event.preventDefault();
+      const selectedIndex = selectedChordIndexRef.current;
+      playMidiNotes(chordMidiValues[selectedIndex]);
+      window.setTimeout(() => highlightChord(selectedIndex), 0);
+      return;
+    }
+
+    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") {
+      return;
+    }
+
+    event.preventDefault();
+    const direction = event.key === "ArrowRight" ? 1 : -1;
+    const nextIndex = selectedChordIndexRef.current + direction;
+
+    if (nextIndex < 0 || nextIndex >= chordMidiValues.length) {
+      return;
+    }
+
+    selectedChordIndexRef.current = nextIndex;
+    highlightChord(nextIndex);
+  };
 
   useEffect(() => {
-    ABCJS.renderAbc(
+    selectedChordIndexRef.current = 0;
+  }, [numberOfNotesInChord, root, system]);
+
+  useEffect(() => {
+    const visualObj = ABCJS.renderAbc(
       system.id,
-      `X:${system.abcId}
-V:1 clef=${clefValue}
-L:1/4
-${abc_chordString} ||`,
+      `${abcPrefix}${abc_chordString} ||`,
       {
         responsive: "resize",
         clickListener: (abcElem) => {
@@ -120,21 +201,41 @@ ${abc_chordString} ||`,
             return;
           }
 
-          const abcPitchNames = (abcElem.pitches || []).map(({ name }) => name);
-          const midiValues = abcPitchNames
-            .map(abcPitchToMidi)
-            .filter((value) => value != null);
+          const clickedIndex = chordRanges.findIndex(
+            ({ start, end }) =>
+              abcElem.startChar >= start && abcElem.startChar <= end,
+          );
 
-          playMidiNotes(midiValues);
+          if (clickedIndex >= 0) {
+            selectedChordIndexRef.current = clickedIndex;
+            highlightChord(clickedIndex);
+            window.setTimeout(() => highlightChord(clickedIndex), 0);
+          }
         },
       },
     );
-  }, [abc_chordString, clefValue, octaveShift, root, system]);
+    visualObjRef.current = visualObj;
+    visualObj[0].setUpAudio();
+    highlightChord(selectedChordIndexRef.current);
+  }, [
+    abcPrefix,
+    abc_chordString,
+    chordRanges,
+    clefValue,
+    highlightChord,
+    octaveShift,
+    root,
+    system,
+  ]);
 
   return (
     <section
+      ref={sectionRef}
       className="tonal-system"
       aria-label={`${root} ${system.ariaLabel}`}
+      tabIndex="0"
+      onClick={() => sectionRef.current?.focus()}
+      onKeyDown={handleKeyDown}
     >
       <h2 className="tonal-system-title">
         {note} {system.title}

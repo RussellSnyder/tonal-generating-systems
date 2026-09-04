@@ -141,6 +141,21 @@ h1 {
   margin-top: 40px;
 }
 
+.tonal-system-chord-selected {
+  fill: #a0871f;
+  stroke: #a0871f;
+}
+
+.chord-scale-entry-selected {
+  fill: #a0871f;
+  stroke: #a0871f;
+}
+
+:root[data-theme="dark"] .chord-scale-entry-selected {
+  /* fill: #fff !important;
+  stroke: #fff !important; */
+}
+
 .chord-scale-page {
   margin-top: 40px;
 }
@@ -203,5 +218,15 @@ h1 {
 
   .tonal-system-title {
     border-color: #000;
+  }
+
+  .tonal-system-chord-selected {
+    fill: black;
+    stroke: black;
+  }
+
+  .chord-scale-entry-selected {
+    fill: black;
+    stroke: black;
   }
 }

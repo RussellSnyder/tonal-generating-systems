@@ -50,46 +50,27 @@ export function abcNoteToName(abcNote) {
   return `${letter.toUpperCase()}${noteAccidental}`;
 }
 
-export function abcPitchToMidi(abcPitch) {
-  if (typeof abcPitch !== "string" || !abcPitch.trim()) {
-    return null;
-  }
+export function abcNoteToTonal(abcNote) {
+  if (typeof abcNote !== "string") return null;
 
-  const normalized = abcPitch.trim();
-  const match = normalized.match(/^([A-Ga-g])([#b]*)([',]*)$/);
-  if (!match) {
-    return null;
-  }
+  const match = /^([_^]*)([A-Ga-g])([',]*)$/.exec(abcNote.trim());
+  if (!match) return null;
 
-  const [, noteLetter, accidental = "", octaveMarks] = match;
-  const letter = noteLetter.toUpperCase();
-  const semitoneMap = {
-    C: 0,
-    D: 2,
-    E: 4,
-    F: 5,
-    G: 7,
-    A: 9,
-    B: 11,
-  };
-
-  let midi = semitoneMap[letter];
-
-  if (accidental.includes("#")) {
-    midi += accidental.length;
-  }
-  if (accidental.includes("b")) {
-    midi -= accidental.length;
-  }
-
-  const octaveOffset =
+  const [, accidental, letter, octaveMarks] = match;
+  const noteAccidental = accidental.startsWith("^")
+    ? "#".repeat(accidental.length)
+    : "b".repeat(accidental.length);
+  const octave =
+    (letter === letter.toUpperCase() ? 4 : 5) +
     (octaveMarks.match(/'/g) || []).length -
     (octaveMarks.match(/,/g) || []).length;
 
-  const isLowercase = noteLetter === noteLetter.toLowerCase();
-  const octaveNumber = isLowercase ? 5 + octaveOffset : 4 + octaveOffset;
+  return `${letter.toUpperCase()}${noteAccidental}${octave}`;
+}
 
-  return (octaveNumber + 1) * 12 + midi;
+export function abcPitchToMidi(abcPitch) {
+  const tonalNote = abcNoteToTonal(abcPitch);
+  return tonalNote ? Note.midi(tonalNote) : null;
 }
 
 export function createABCScale(root, scaleRoot, scale) {
