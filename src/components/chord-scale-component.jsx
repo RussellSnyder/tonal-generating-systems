@@ -9,7 +9,7 @@ import {
 } from "../utils/abc-notation";
 
 function getAbcChordNotation(root, chord, scales, clefValue) {
-  const { note, octave } = tonal_getNoteAndOctave(root);
+  const { note } = tonal_getNoteAndOctave(root);
 
   const tonal_scales = scales.map(({ name, distanceFromRoot }) => {
     const scaleRoot = Note.transpose(root, distanceFromRoot);
@@ -77,12 +77,9 @@ function ChordScaleComponent({
       className="chord-scale-component"
       aria-label={`Chord and scales for ${root}`}
     >
-      <div className="chord-scale-header">
-        <span className="chord-scale-root">
-          {note}
-          {name}
-        </span>
-      </div>
+      <h2 className="tonal-system-title">
+        {note} {name}
+      </h2>
       <div ref={staffRef} className="abcjs-notation" />
     </section>
   );

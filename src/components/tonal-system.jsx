@@ -1,6 +1,6 @@
 import ABCJS from "abcjs";
 import { useEffect } from "react";
-import { Chord, Range, Scale } from "tonal";
+import { Chord, Note, Range, Scale } from "tonal";
 import {
   abcPitchToMidi,
   noteNameToAbc,
@@ -52,7 +52,7 @@ function TonalSystem({
   numberOfNotesInChord,
   octaveShift = 0,
 }) {
-  const { note, octave } = tonal_getNoteAndOctave(root);
+  const { note } = tonal_getNoteAndOctave(root);
 
   const tonal_scale = Scale.get(`${root} ${system.scale}`).notes;
 
@@ -62,28 +62,57 @@ function TonalSystem({
     ),
   );
 
-  const abc_chords = tonal_chords.map((chord) => chord.map(noteNameToAbc));
-  const abc_chordString = abc_chords
-    .map((chord, i) => {
-      let symbol;
-      if (numberOfNotesInChord === 3) {
-        symbol = system.triadQualities[i];
-      } else {
-        symbol = system.chordQualities[i].label;
-      }
+  const chordEntries = tonal_scale.flatMap((note, i) => {
+    const chord = tonal_chords[i].map(noteNameToAbc).map((note) => `${note}4`);
+    const symbol =
+      numberOfNotesInChord === 3
+        ? system.triadQualities[i]
+        : system.chordQualities[i].label;
+    const entries = [
+      `"${tonal_getNoteAndOctave(tonal_scale[i]).note}${symbol}" [${chord.join(" ")}]`,
+    ];
 
-      return `"${tonal_getNoteAndOctave(tonal_scale[i]).note}${symbol}" [${chord.join(" ")}]`;
-    })
-    .join("|");
+    if (numberOfNotesInChord === 3) {
+      return entries;
+    }
+
+    const extraChords = (system.extraChords ?? [])
+      .filter((extraChord) => extraChord.afterDegree === i)
+      .map((extraChord) => {
+        const intervalsInRelationToRoot =
+          extraChord.intervalsInRelationToRoot ?? [];
+        const tonal_extraChordNotes = intervalsInRelationToRoot.map(
+          (interval) => Note.transpose(root, interval),
+        );
+        console.log({ tonal_extraChordNotes });
+        const abc_extraChordNotes = (tonal_extraChordNotes ?? [])
+          .map(noteNameToAbc)
+          .map((note) => `${note}`);
+
+        const { note: extraNoteRoot } = tonal_getNoteAndOctave(
+          tonal_extraChordNotes[0],
+        );
+
+        const label = `${extraNoteRoot}${extraChord.quality}`;
+        const displayedLabel = extraChord.parenthesized ? `(${label})` : label;
+        const symbolText =
+          extraChord.showSymbol === false ? "" : `"${displayedLabel}" `;
+
+        return `${symbolText}[${abc_extraChordNotes.join(" ")}]`;
+      });
+
+    return [...entries, ...extraChords];
+  });
+
+  const abc_chordString = chordEntries.join(" ");
 
   useEffect(() => {
     ABCJS.renderAbc(
       system.id,
       `X:${system.abcId}
-T:${system.title}
 V:1 clef=${clefValue}
-L:4/4
-${abc_chordString}`,
+L:1/4
+${abc_chordString} ||`,
       {
         responsive: "resize",
         clickListener: (abcElem) => {
@@ -102,7 +131,17 @@ ${abc_chordString}`,
     );
   }, [abc_chordString, clefValue, octaveShift, root, system]);
 
-  return <section id={system.id} aria-label={`${root} ${system.ariaLabel}`} />;
+  return (
+    <section
+      className="tonal-system"
+      aria-label={`${root} ${system.ariaLabel}`}
+    >
+      <h2 className="tonal-system-title">
+        {note} {system.title}
+      </h2>
+      <div id={system.id} />
+    </section>
+  );
 }
 
 export default TonalSystem;
